@@ -63,7 +63,7 @@ func (a *App) SelectEdit(ctx context.Context, delaySec int) error {
 	if _, err := a.Tools.GrimRegion(ctx, geom, tmpFile); err != nil {
 		return fmt.Errorf("capture failed: %w", err)
 	}
-	defer os.Remove(tmpFile)
+	defer func() { _ = os.Remove(tmpFile) }()
 
 	outputFile := a.Config.GenerateScreenshotPath()
 	return a.Tools.Satty(ctx, tmpFile, outputFile)
