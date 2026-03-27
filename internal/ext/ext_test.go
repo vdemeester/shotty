@@ -2,6 +2,7 @@ package ext
 
 import (
 	"context"
+	"syscall"
 	"testing"
 )
 
@@ -36,6 +37,10 @@ func (f *fakeRunner) RunWithStdin(ctx context.Context, stdin []byte, name string
 func (f *fakeRunner) Start(ctx context.Context, name string, args ...string) (int, error) {
 	f.calls = append(f.calls, fakeCall{name: name, args: args})
 	return 12345, f.err
+}
+
+func (f *fakeRunner) Signal(_ int, _ syscall.Signal) error {
+	return f.err
 }
 
 // --- Slurp tests ---
@@ -299,6 +304,28 @@ func TestStartWfRecorderFullscreen(t *testing.T) {
 	}
 	call := r.calls[0]
 	assertNotContains(t, call.args, "-g")
+}
+
+// --- Signal tests ---
+
+func TestStopWfRecorder(t *testing.T) {
+	r := &fakeRunner{}
+	tools := NewTools(r)
+
+	err := tools.StopWfRecorder(12345)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestPauseWfRecorder(t *testing.T) {
+	r := &fakeRunner{}
+	tools := NewTools(r)
+
+	err := tools.PauseWfRecorder(12345)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 }
 
 // --- helpers ---

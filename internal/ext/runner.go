@@ -7,6 +7,7 @@ package ext
 import (
 	"bytes"
 	"context"
+	"os"
 	"os/exec"
 	"syscall"
 )
@@ -21,6 +22,8 @@ type Runner interface {
 	RunWithStdin(ctx context.Context, stdin []byte, name string, args ...string) error
 	// Start launches a command in the background and returns its PID.
 	Start(ctx context.Context, name string, args ...string) (int, error)
+	// Signal sends a signal to a process by PID.
+	Signal(pid int, sig syscall.Signal) error
 }
 
 // ExecRunner implements Runner using os/exec.
@@ -47,4 +50,12 @@ func (ExecRunner) Start(ctx context.Context, name string, args ...string) (int, 
 		return 0, err
 	}
 	return cmd.Process.Pid, nil
+}
+
+func (ExecRunner) Signal(pid int, sig syscall.Signal) error {
+	process, err := os.FindProcess(pid)
+	if err != nil {
+		return err
+	}
+	return process.Signal(sig)
 }

@@ -4,11 +4,15 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"syscall"
 	"testing"
 
 	"github.com/vdemeester/shotty/internal/config"
 	"github.com/vdemeester/shotty/internal/ext"
 )
+
+// fakePID is our own PID so state reads don't treat it as stale.
+var fakePID = os.Getpid()
 
 // fakeRunner for testing commands without executing external tools.
 type fakeRunner struct {
@@ -40,7 +44,11 @@ func (f *fakeRunner) RunWithStdin(ctx context.Context, stdin []byte, name string
 
 func (f *fakeRunner) Start(ctx context.Context, name string, args ...string) (int, error) {
 	f.calls = append(f.calls, fakeCall{name: name, args: args})
-	return 12345, f.err
+	return fakePID, f.err
+}
+
+func (f *fakeRunner) Signal(_ int, _ syscall.Signal) error {
+	return f.err
 }
 
 func (f *fakeRunner) findCalls(name string) []fakeCall {

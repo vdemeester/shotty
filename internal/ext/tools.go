@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"syscall"
 )
 
 // Action represents a notification action button.
@@ -141,4 +142,14 @@ func (t *Tools) StartWfRecorder(ctx context.Context, geometry, file string) (int
 		args = append(args, "-g", geometry)
 	}
 	return t.runner.Start(ctx, "wf-recorder", args...)
+}
+
+// StopWfRecorder sends SIGINT to wf-recorder process.
+func (t *Tools) StopWfRecorder(pid int) error {
+	return t.runner.Signal(pid, syscall.SIGINT)
+}
+
+// PauseWfRecorder sends SIGUSR1 to toggle pause.
+func (t *Tools) PauseWfRecorder(pid int) error {
+	return t.runner.Signal(pid, syscall.SIGUSR1)
 }
