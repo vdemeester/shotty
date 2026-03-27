@@ -77,7 +77,7 @@ func TestBuildWaybarStatusJSON(t *testing.T) {
 				t.Fatalf("marshal failed: %v", err)
 			}
 
-			var parsed map[string]interface{}
+			var parsed map[string]any
 			if err := json.Unmarshal(data, &parsed); err != nil {
 				t.Fatalf("output is not valid JSON: %v", err)
 			}

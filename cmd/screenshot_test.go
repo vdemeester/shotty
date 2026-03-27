@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"slices"
 	"syscall"
 	"testing"
 
@@ -224,10 +225,7 @@ func TestSelectEdit(t *testing.T) {
 
 func assertArgsContain(t *testing.T, args []string, want string) {
 	t.Helper()
-	for _, a := range args {
-		if a == want {
-			return
-		}
+	if !slices.Contains(args, want) {
+		t.Errorf("args %v does not contain %q", args, want)
 	}
-	t.Errorf("args %v does not contain %q", args, want)
 }

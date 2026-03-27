@@ -2,6 +2,7 @@ package ext
 
 import (
 	"context"
+	"slices"
 	"syscall"
 	"testing"
 )
@@ -332,20 +333,14 @@ func TestPauseWfRecorder(t *testing.T) {
 
 func assertContains(t *testing.T, args []string, want string) {
 	t.Helper()
-	for _, a := range args {
-		if a == want {
-			return
-		}
+	if !slices.Contains(args, want) {
+		t.Errorf("args %v does not contain %q", args, want)
 	}
-	t.Errorf("args %v does not contain %q", args, want)
 }
 
 func assertNotContains(t *testing.T, args []string, unwanted string) {
 	t.Helper()
-	for _, a := range args {
-		if a == unwanted {
-			t.Errorf("args %v should not contain %q", args, unwanted)
-			return
-		}
+	if slices.Contains(args, unwanted) {
+		t.Errorf("args %v should not contain %q", args, unwanted)
 	}
 }
