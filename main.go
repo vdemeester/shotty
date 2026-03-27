@@ -22,9 +22,10 @@ func main() {
 	}
 
 	root := &cli.Command{
-		Name:    "shotty",
-		Usage:   "Screenshot and recording tool for Wayland",
-		Version: version,
+		Name:                   "shotty",
+		Usage:                  "Screenshot and recording tool for Wayland",
+		Version:                version,
+		EnableShellCompletion:  true,
 		Commands: []*cli.Command{
 			// Screenshots
 			{

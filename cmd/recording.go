@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/vdemeester/shotty/internal/delay"
@@ -31,11 +30,9 @@ func (a *App) RecordScreen(ctx context.Context, delaySec int) error {
 }
 
 func (a *App) startRecording(ctx context.Context, geometry string) error {
-	// Use .avi during recording, convert to .mp4 on stop
-	mp4Path := a.Config.GenerateRecordingPath()
-	aviPath := strings.TrimSuffix(mp4Path, ".mp4") + ".avi"
+	path := a.Config.GenerateRecordingPath()
 
-	pid, err := a.Tools.StartWfRecorder(ctx, geometry, aviPath)
+	pid, err := a.Tools.StartWfRecorder(ctx, geometry, path)
 	if err != nil {
 		return fmt.Errorf("failed to start recording: %w", err)
 	}
@@ -43,7 +40,7 @@ func (a *App) startRecording(ctx context.Context, geometry string) error {
 	s := &state.State{
 		Recording: true,
 		PID:       pid,
-		File:      aviPath,
+		File:      path,
 		StartedAt: time.Now(),
 	}
 
@@ -55,7 +52,7 @@ func (a *App) startRecording(ctx context.Context, geometry string) error {
 	return nil
 }
 
-// RecordStop stops the current recording and converts to MP4.
+// RecordStop stops the current recording.
 func (a *App) RecordStop(ctx context.Context) error {
 	s, err := state.Read(a.Config.StateFile)
 	if err != nil {
@@ -70,23 +67,10 @@ func (a *App) RecordStop(ctx context.Context) error {
 		return fmt.Errorf("failed to stop recording: %w", err)
 	}
 
-	// Wait for process to finish writing
+	// Wait for wf-recorder to flush and close the file
 	time.Sleep(500 * time.Millisecond)
 
-	// Clear state immediately
 	_ = state.Clear(a.Config.StateFile)
-
-	// Convert AVI to MP4
-	aviPath := s.File
-	mp4Path := strings.TrimSuffix(aviPath, ".avi") + ".mp4"
-
-	a.Tools.NotifySimple(ctx, "Converting recording…", 3000)
-
-	if err := a.Tools.ConvertToMP4(ctx, aviPath, mp4Path); err != nil {
-		return fmt.Errorf("conversion failed: %w", err)
-	}
-
-	_ = os.Remove(aviPath)
 
 	// Post-recording notification actions
 	actions := []ext.Action{
@@ -95,7 +79,7 @@ func (a *App) RecordStop(ctx context.Context) error {
 	}
 
 	action, err := a.Tools.Notify(ctx,
-		fmt.Sprintf("Recording saved: %s", filepath.Base(mp4Path)),
+		fmt.Sprintf("Recording saved: %s", filepath.Base(s.File)),
 		"", 30000, actions)
 	if err != nil || action == "" {
 		return nil
@@ -103,9 +87,9 @@ func (a *App) RecordStop(ctx context.Context) error {
 
 	switch action {
 	case "copypath":
-		_ = a.Tools.WlCopyText(ctx, mp4Path)
+		_ = a.Tools.WlCopyText(ctx, s.File)
 	case "delete":
-		_ = os.Remove(mp4Path)
+		_ = os.Remove(s.File)
 	}
 
 	return nil

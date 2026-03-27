@@ -46,7 +46,7 @@ func (a *App) SelectFile(ctx context.Context, delaySec int) error {
 		return fmt.Errorf("capture failed: %w", err)
 	}
 
-	a.handleScreenshotFileActions(ctx, path)
+	a.handleScreenshotFileActions(path)
 	return nil
 }
 
@@ -90,7 +90,7 @@ func (a *App) WindowFile(ctx context.Context, delaySec int) error {
 		return fmt.Errorf("window capture failed: %w", err)
 	}
 
-	a.handleScreenshotFileActions(ctx, path)
+	a.handleScreenshotFileActions(path)
 	return nil
 }
 
@@ -115,12 +115,13 @@ func (a *App) ScreenFile(ctx context.Context, delaySec int) error {
 		return fmt.Errorf("screen capture failed: %w", err)
 	}
 
-	a.handleScreenshotFileActions(ctx, path)
+	a.handleScreenshotFileActions(path)
 	return nil
 }
 
 // handleScreenshotFileActions shows a notification with post-capture actions.
-func (a *App) handleScreenshotFileActions(ctx context.Context, path string) {
+func (a *App) handleScreenshotFileActions(path string) {
+	ctx := context.Background()
 	actions := []ext.Action{
 		{ID: "copy", Label: "Copy image"},
 		{ID: "copypath", Label: "Copy path"},
