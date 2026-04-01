@@ -15,7 +15,7 @@ func TestRecordSelect(t *testing.T) {
 	cfg := testConfig(t)
 	app := &App{Tools: tools, Config: cfg}
 
-	err := app.RecordSelect(context.Background(), 0)
+	err := app.RecordSelect(context.Background(), 0, false, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -51,7 +51,7 @@ func TestRecordScreen(t *testing.T) {
 	cfg := testConfig(t)
 	app := &App{Tools: tools, Config: cfg}
 
-	err := app.RecordScreen(context.Background(), 0)
+	err := app.RecordScreen(context.Background(), 0, false, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -140,7 +140,7 @@ func TestRecordToggleStartsWhenIdle(t *testing.T) {
 	cfg := testConfig(t)
 	app := &App{Tools: tools, Config: cfg}
 
-	err := app.RecordToggle(context.Background(), 0)
+	err := app.RecordToggle(context.Background(), 0, false, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

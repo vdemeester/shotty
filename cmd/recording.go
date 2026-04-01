@@ -13,26 +13,26 @@ import (
 )
 
 // RecordSelect prompts for region selection then starts recording.
-func (a *App) RecordSelect(ctx context.Context, delaySec int) error {
+func (a *App) RecordSelect(ctx context.Context, delaySec int, audio bool, audioDevice string) error {
 	geom, err := a.Tools.Slurp(ctx)
 	if err != nil {
 		return fmt.Errorf("selection cancelled: %w", err)
 	}
 
 	delay.Countdown(a.Config.StateFile, delaySec)
-	return a.startRecording(ctx, geom)
+	return a.startRecording(ctx, geom, audio, audioDevice)
 }
 
 // RecordScreen starts recording the full screen.
-func (a *App) RecordScreen(ctx context.Context, delaySec int) error {
+func (a *App) RecordScreen(ctx context.Context, delaySec int, audio bool, audioDevice string) error {
 	delay.Countdown(a.Config.StateFile, delaySec)
-	return a.startRecording(ctx, "")
+	return a.startRecording(ctx, "", audio, audioDevice)
 }
 
-func (a *App) startRecording(ctx context.Context, geometry string) error {
+func (a *App) startRecording(ctx context.Context, geometry string, audio bool, audioDevice string) error {
 	path := a.Config.GenerateRecordingPath()
 
-	pid, err := a.Tools.StartWfRecorder(ctx, geometry, path)
+	pid, err := a.Tools.StartWfRecorder(ctx, geometry, path, audio, audioDevice)
 	if err != nil {
 		return fmt.Errorf("failed to start recording: %w", err)
 	}
@@ -125,7 +125,7 @@ func (a *App) RecordPause(ctx context.Context) error {
 }
 
 // RecordToggle starts a region recording if idle, stops if recording.
-func (a *App) RecordToggle(ctx context.Context, delaySec int) error {
+func (a *App) RecordToggle(ctx context.Context, delaySec int, audio bool, audioDevice string) error {
 	s, err := state.Read(a.Config.StateFile)
 	if err != nil {
 		return fmt.Errorf("failed to read state: %w", err)
@@ -135,5 +135,5 @@ func (a *App) RecordToggle(ctx context.Context, delaySec int) error {
 		return a.RecordStop(ctx)
 	}
 
-	return a.RecordSelect(ctx, delaySec)
+	return a.RecordSelect(ctx, delaySec, audio, audioDevice)
 }

@@ -278,7 +278,7 @@ func TestStartWfRecorderWithGeometry(t *testing.T) {
 	r := &fakeRunner{}
 	tools := NewTools(r)
 
-	pid, err := tools.StartWfRecorder(context.Background(), "100,200 300x400", "/tmp/rec.avi")
+	pid, err := tools.StartWfRecorder(context.Background(), "100,200 300x400", "/tmp/rec.avi", false, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -299,7 +299,7 @@ func TestStartWfRecorderFullscreen(t *testing.T) {
 	r := &fakeRunner{}
 	tools := NewTools(r)
 
-	_, err := tools.StartWfRecorder(context.Background(), "", "/tmp/rec.avi")
+	_, err := tools.StartWfRecorder(context.Background(), "", "/tmp/rec.avi", false, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -308,6 +308,27 @@ func TestStartWfRecorderFullscreen(t *testing.T) {
 }
 
 // --- Signal tests ---
+
+func TestStartWfRecorderAudio(t *testing.T) {
+	r := &fakeRunner{}
+	tools := NewTools(r)
+
+	// Test with just audio
+	_, err := tools.StartWfRecorder(context.Background(), "", "/tmp/rec.avi", true, "")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	assertContains(t, r.calls[0].args, "-a")
+	
+	// Test with specific audio device
+	r.calls = nil // reset calls
+	_, err = tools.StartWfRecorder(context.Background(), "", "/tmp/rec.avi", false, "alsa_output.monitor")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	assertContains(t, r.calls[0].args, "-a")
+	assertContains(t, r.calls[0].args, "alsa_output.monitor")
+}
 
 func TestStopWfRecorder(t *testing.T) {
 	r := &fakeRunner{}

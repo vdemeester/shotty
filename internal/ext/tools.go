@@ -136,10 +136,16 @@ func (t *Tools) ConvertToMP4(ctx context.Context, input, output string) error {
 }
 
 // StartWfRecorder starts wf-recorder and returns the PID.
-func (t *Tools) StartWfRecorder(ctx context.Context, geometry, file string) (int, error) {
+func (t *Tools) StartWfRecorder(ctx context.Context, geometry, file string, audio bool, audioDevice string) (int, error) {
 	args := []string{"-f", file}
 	if geometry != "" {
 		args = append(args, "-g", geometry)
+	}
+	if audio || audioDevice != "" {
+		args = append(args, "-a")
+		if audioDevice != "" {
+			args = append(args, audioDevice)
+		}
 	}
 	return t.runner.Start(ctx, "wf-recorder", args...)
 }

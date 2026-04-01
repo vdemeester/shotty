@@ -21,6 +21,17 @@ func main() {
 		Value:   0,
 	}
 
+	audioFlag := &cli.BoolFlag{
+		Name:    "audio",
+		Aliases: []string{"a"},
+		Usage:   "Enable audio recording",
+	}
+
+	audioDeviceFlag := &cli.StringFlag{
+		Name:  "audio-device",
+		Usage: "Audio device/source to record from (implies --audio)",
+	}
+
 	root := &cli.Command{
 		Name:                   "shotty",
 		Usage:                  "Screenshot and recording tool for Wayland",
@@ -66,13 +77,19 @@ func main() {
 			// Recording
 			{
 				Name: "record-select", Usage: "Record video of selection",
-				Flags:  []cli.Flag{delayFlag},
-				Action: func(ctx context.Context, c *cli.Command) error { return app.RecordSelect(ctx, int(c.Int("delay"))) },
+				Flags: []cli.Flag{delayFlag, audioFlag, audioDeviceFlag},
+				Action: func(ctx context.Context, c *cli.Command) error {
+					audio := c.Bool("audio") || c.String("audio-device") != ""
+					return app.RecordSelect(ctx, int(c.Int("delay")), audio, c.String("audio-device"))
+				},
 			},
 			{
 				Name: "record-screen", Usage: "Record video of screen",
-				Flags:  []cli.Flag{delayFlag},
-				Action: func(ctx context.Context, c *cli.Command) error { return app.RecordScreen(ctx, int(c.Int("delay"))) },
+				Flags: []cli.Flag{delayFlag, audioFlag, audioDeviceFlag},
+				Action: func(ctx context.Context, c *cli.Command) error {
+					audio := c.Bool("audio") || c.String("audio-device") != ""
+					return app.RecordScreen(ctx, int(c.Int("delay")), audio, c.String("audio-device"))
+				},
 			},
 			{
 				Name: "record-stop", Usage: "Stop recording and convert to mp4",
@@ -84,8 +101,11 @@ func main() {
 			},
 			{
 				Name: "record-toggle", Usage: "Toggle recording (start select if idle, stop if recording)",
-				Flags:  []cli.Flag{delayFlag},
-				Action: func(ctx context.Context, c *cli.Command) error { return app.RecordToggle(ctx, int(c.Int("delay"))) },
+				Flags: []cli.Flag{delayFlag, audioFlag, audioDeviceFlag},
+				Action: func(ctx context.Context, c *cli.Command) error {
+					audio := c.Bool("audio") || c.String("audio-device") != ""
+					return app.RecordToggle(ctx, int(c.Int("delay")), audio, c.String("audio-device"))
+				},
 			},
 			// Waybar
 			{
